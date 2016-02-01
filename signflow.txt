@@ -1,0 +1,20 @@
+Chris creates a payload, signs it, and encrypts it for Amy, writes out a history with Amy as the holder.
+
+encrypted payload
+- minter signature (immutable)
+public payload
+- minter signature (immutable)
+
+minter
+ - signing pubkey
+ - encrypting pubkey 
+  - signature
+history
+	[holder1, minter signature]
+
+
+Amy decrypts the paylod to display it.
+
+Amy gives the coin to Irma by encrypting payload for Irma and, adding her to the holder list (tree?).
+
+history
