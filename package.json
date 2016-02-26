@@ -4,6 +4,7 @@
   "description": "Tiny blockchains for a big idea.",
   "main": "index.js",
   "dependencies": {
+    "babel-register": "^6.5.2",
     "prova": "^2.1.2"
   },
   "devDependencies": {},

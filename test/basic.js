@@ -1,31 +1,41 @@
 var test = require('prova')
-var jwt = require('webcrypto-jwt');
+// var jwt = require('webcrypto-jwt');
+var jose = require("node-jose");
 
-test('jwt test', function (t) {
-  t.plan(3)
+test("create a signing keypair and sign/verify an input", function (t) {
+  t.plan(4)
+  var keystore = jose.JWK.createKeyStore();
 
-  // token signed using 'secret' as secret
-  var token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
-  'eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.' +
-  'TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ';
+  var props = {
+    kid: 'gBdaS-G8RLax2qgObTD94w',
+    alg: 'A256GCM',
+    use: 'enc'
+  };
+  keystore.generate("oct", 256).
+    then(function(key) {
+      t.equals(key.keystore, keystore, "the keystore")
+      var input = "Hello Alice";
+      jose.JWS.createSign(key).
+        update(input, "utf8").
+        final().
+        then(function(result) {
+          console.log("result", result)
+          t.equals(result.payload, "SGVsbG8gQWxpY2U")
 
-  jwt.verifyJWT(token, 'secret', 'HS256', function (err, isValid) {
-    console.log("verifyJWT",isValid); // true
-    t.equal(isValid, true)
-  });
+          jose.JWS.createVerify(key).
+            verify(result).
+            then(function(decoded) {
+              t.equals(decoded.payload.toString(), "Hello Alice")
+              t.equals(decoded.key, key)
+            // {result} is a Object with:
+            // *  header: the combined 'protected' and 'unprotected' header members
+            // *  payload: Buffer of the signed content
+            // *  signature: Buffer of the verified signature
+            // *  key: The key used to verify the signature
+            });
 
-  jwt.verifyJWT(token, 'nosecret', 'HS256', function (err, isValid) {
-    console.log("verifyJWT",isValid); // false
-    t.equal(isValid, false)
-  });
-
-  // var decoded = jwt.decodeJWT(token); // '{"sub":"1234567890","name":"John Doe","admin":true}'
-
-  var parsed = jwt.parseJWT(token) // Object {sub: "1234567890", name: "John Doe", admin: true}
-
-  t.equal(parsed.name, "John Doe")
-  t.equal(parsed.admin, true)
-
+        }).catch(function (error) {
+          t.error(error)
+        });
+    });
 })
-
-// test("")

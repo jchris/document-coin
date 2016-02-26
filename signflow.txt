@@ -2,19 +2,136 @@ Chris creates a payload, signs it, and encrypts it for Amy, writes out a history
 
 encrypted payload
 - minter signature (immutable)
-public payload
+public payload (immutable)
 - minter signature (immutable)
 
 minter
  - signing pubkey
- - encrypting pubkey 
+ - encrypting pubkey
   - signature
 history
 	[holder1, minter signature]
 
 
+replies with reply_to message id / signature? part of public content not history
+
 Amy decrypts the paylod to display it.
 
 Amy gives the coin to Irma by encrypting payload for Irma and, adding her to the holder list (tree?).
 
+combined history
+	[holder2, holder1 signature]
+	[holder1, minter signature]
+
+
+history-holders
+
+collection of jwt, run map to decode and view them by pubkey.
+
+
+JWT signed by giver :
+
+chrispubkey signed version of the givetree with amypubkey as holder.
+amypubkey signed version of the givetree with irmapubkey as holder.
+irma signs the givetree to sam.
+amy signs the givetree to isaac.
+
+Amy may or may not have learned about irma's give when she signs Isaacs, so we need to preserve that logical key structure when we sign, which means a copy of the tree per signature. And the client merges them all to view a coin's history.
+
+giver-depth is useful?
+to verify we verify all JWTs
+
+nested json web signature
+
+if we
+
+physical structure:
+
+JWT.content {
+	holder : "Chris",
+	giver : { //  minter. the root is self signed
+		signing-key : giver-signing-pubkey,
+		encryption-key : giver-encryption-pubkey
+	}
+	recevier : "Amy pubkey"
+} .Chris signature
+
+
+appen, mutate or add?
+
+JWT.content {
+	holder : "Chris",
+	gives : [
+	 {
+	 	holder : "Amy",
+		giver : { //  minter. the root is self signed
+			signing-key : giver-signing-pubkey,
+			encryption-key : giver-encryption-pubkey
+		}
+	 }
+	]
+}.Chris signature
+
+
+
+{
+	holder : "Chris",
+	minter-sig : "Chris Sig",
+	gives : [
+	 {
+	 	holder : "Amy", giver-sig : "Chris Sig",
+	 	gives : [{holder : "Irma",
+	 		giver-sig : "Amy Sig",
+	 		gives : []}]
+	 }
+	]
+}
+
+
+{
+	signed : "give:ChrisKey;bh:documenthash|Chris Sig",
+	gives : [
+	 {
+	 	signed : "give:AmyKey;bh:parenthash|Chris Sig",
+	 	gives : [
+	 		{signed : "IsaacKey;bh:parenthash|Amy Sig",
+	 		gives : [
+	 			{signed : "JohnKey;bh:parenthash|Isaac Sig"}
+	 		]},
+	 		{signed : "IrmaKey;bh:parenthash|Amy Sig",
+	 		gives : []}
+	 	]
+	 }
+	]
+}
+
+
+["give:ChrisKey;bh:documenthash|Chris Sig",[]]
+
+["give:ChrisKey;bh:documenthash|Chris Sig",[
+  ["give:AmyKey;bh:parenthash;prev-id-givetree-blockhash|Chris Sig",[
+    ["give:IsaacKey;bh:parenthash|Amy Sig",[]],
+    ["give:IrmaKey;bh:parenthash|Amy Sig",[]]
+  ]]
+]]
+
+  
+
+ethereum program along the coin history to control who can give multiple copies? update validate.
+
+
+history-signatures
+- [minter sig, holder1 sig]
+
+
+Irma decrypts the paylod to display it.
+
+Irma gives the coin to Isaac by encrypting payload for Isaac and, adding him to the holder list (tree?).
+
 history
+	[holder3, holder2 signature]
+	[holder2, holder1 signature]
+	[holder1, minter signature]
+
+history-signatures
+- [minter sig, holder1 sig]

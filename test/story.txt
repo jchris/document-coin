@@ -1,0 +1,9 @@
+Generate key for Chris and save it locally.
+
+Chris mints a new coin, including encrypted content.
+
+
+
+
+
+Chris creates a payload, signs it, and encrypts it for Amy, writes out a history with Amy as the holder.
