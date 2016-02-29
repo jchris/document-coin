@@ -63,7 +63,7 @@ test("give a coin", function (t) {
 
 
 test("give a coin multiple times", function (t) {
-  t.plan(3)
+  t.plan(5)
   var wallet = new dc.Wallet("Alice");
   wallet.setupKeys().then(function(){
     var wallet2 = new dc.Wallet("Bob");
@@ -78,10 +78,10 @@ test("give a coin multiple times", function (t) {
               t.equals(coin.givetree[1][0][1].length, 1, "first child children one")
               coin.give(wallet2, wallet.signingKey.toJSON()).then(()=>{
                 t.equals(coin.givetree[1][0][1].length, 2, "first child children after double give")
-              })
-              t.equals(coin.givetree[1][0][1][0][1].length, 0, "second child children before give")
-              coin.give(wallet3, wallet.signingKey.toJSON()).then(()=>{
-                t.equals(coin.givetree[1][0][1][0][1].length, 1, "second child children after give")
+                t.equals(coin.givetree[1][0][1][0][1].length, 0, "second child children before give")
+                coin.give(wallet3, wallet.signingKey.toJSON()).then(()=>{
+                  t.equals(coin.givetree[1][0][1][0][1].length, 1, "second child children after give")
+                })
               })
             })
           })
