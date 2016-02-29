@@ -38,6 +38,31 @@ test("mint a coin", function (t) {
 })
 
 test("give a coin", function (t) {
+  t.plan(5)
+  var wallet = new dc.Wallet("Alice");
+  wallet.setupKeys().then(function(){
+    var wallet2 = new dc.Wallet("Bob");
+    wallet2.setupKeys().then(function() {
+      var content = new Buffer("The coin is the word.", "utf8")
+      wallet.mint(content).then(function (coin) {
+        // console.log("mant", coin)
+        t.assert(coin.givetree[0], "jose signature")
+        t.assert(coin.givetree[1], "children")
+        coin.give(wallet, wallet2.signingKey.toJSON()).then(()=>{
+          // console.log("gave", coin.givetree)
+          t.assert(coin.givetree[1][0], "first child")
+          t.equals(coin.givetree[1][0][0].length, 480, "first child jose signature")
+          t.equals(coin.givetree[1][0][1].length, 0, "first child children")
+        }).catch((e)=>{
+          console.log("catch", e)
+        })
+      })
+    })
+  })
+})
+
+
+test("give a coin multiple times", function (t) {
   t.plan(3)
   var wallet = new dc.Wallet("Alice");
   wallet.setupKeys().then(function(){
@@ -45,17 +70,25 @@ test("give a coin", function (t) {
     wallet2.setupKeys().then(function() {
       var content = new Buffer("The coin is the word.", "utf8")
       wallet.mint(content).then(function (coin) {
-        wallet.give(coin, wallet2).then(()=>{
-          t.assert(coin.givetree[0], "jose signature")
-          t.assert(coin.givetree[1], "children")
-          t.assert(coin.givetree[1][0], "first child")
-          t.equals(coin.givetree[1][0][0], "first child jose signature")
+        coin.give(wallet, wallet2.signingKey.toJSON()).then(()=>{
+          t.equals(coin.givetree[1][0][1].length, 0, "first child children empty")
+          var wallet3 = new dc.Wallet("Ace");
+          wallet3.setupKeys().then(function() {
+            coin.give(wallet2, wallet3.signingKey.toJSON()).then(()=>{
+              t.equals(coin.givetree[1][0][1].length, 1, "first child children one")
+              coin.give(wallet2, wallet.signingKey.toJSON()).then(()=>{
+                t.equals(coin.givetree[1][0][1].length, 2, "first child children after double give")
+              })
+              t.equals(coin.givetree[1][0][1][0][1].length, 0, "second child children before give")
+              coin.give(wallet3, wallet.signingKey.toJSON()).then(()=>{
+                t.equals(coin.givetree[1][0][1][0][1].length, 1, "second child children after give")
+              })
+            })
+          })
+        }).catch((e)=>{
+          console.log("catch", e)
         })
       })
     })
   })
 })
-//
-// test("wallet sign a wallet", function (t) {
-//
-// })

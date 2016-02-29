@@ -9,7 +9,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "node test/*.js"
+    "test": "node test/story.js -b"
   },
   "author": "Chris Anderson",
   "license": "Apache-2.0"
