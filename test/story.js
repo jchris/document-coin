@@ -18,7 +18,7 @@ test("create a wallet", function (t) {
 })
 
 test("mint a coin", function (t) {
-  t.plan(5)
+  t.plan(6)
   var wallet = new dc.Wallet("test");
   wallet.setupKeys().then(function(){
     var content = new Buffer("The word is the coin.", "utf8")
@@ -32,13 +32,16 @@ test("mint a coin", function (t) {
         then(function(decoded) {
           t.equals(JSON.parse(decoded.payload)[0], "izwuMySz5A-xSRguhHo42LPqN_39f4osW6ITxUsVxa4")
           t.equals(decoded.key, coin.mintKey)
+          coin.validate().then((valid)=>{
+            t.equals(true, valid)
+          })
         })
     })
   })
 })
 
 test("give a coin", function (t) {
-  t.plan(5)
+  t.plan(6)
   var wallet = new dc.Wallet("Alice");
   wallet.setupKeys().then(function(){
     var wallet2 = new dc.Wallet("Bob");
@@ -53,6 +56,9 @@ test("give a coin", function (t) {
           t.assert(coin.givetree[1][0], "first child")
           t.equals(coin.givetree[1][0][0].length, 480, "first child jose signature")
           t.equals(coin.givetree[1][0][1].length, 0, "first child children")
+          coin.validate().then((valid)=>{
+            t.equals(true, valid)
+          })
         }).catch((e)=>{
           console.log("catch", e)
         })
@@ -63,7 +69,7 @@ test("give a coin", function (t) {
 
 
 test("give a coin multiple times", function (t) {
-  t.plan(5)
+  t.plan(6)
   var wallet = new dc.Wallet("Alice");
   wallet.setupKeys().then(function(){
     var wallet2 = new dc.Wallet("Bob");
@@ -81,12 +87,53 @@ test("give a coin multiple times", function (t) {
                 t.equals(coin.givetree[1][0][1][0][1].length, 0, "second child children before give")
                 coin.give(wallet3, wallet.signingKey.toJSON()).then(()=>{
                   t.equals(coin.givetree[1][0][1][0][1].length, 1, "second child children after give")
+                  coin.validate().then((valid)=>{
+                    t.equals(true, valid)
+                  })
                 })
               })
             })
           })
         }).catch((e)=>{
           console.log("catch", e)
+        })
+      })
+    })
+  })
+})
+
+test("invalid coin", function (t) {
+  t.plan(6)
+
+  var wallet = new dc.Wallet("Alice");
+  wallet.setupKeys().then(function(){
+    var wallet2 = new dc.Wallet("Bob");
+    wallet2.setupKeys().then(function() {
+      var content = new Buffer("The coin is the word.", "utf8")
+      wallet.mint(content).then(function (coin) {
+        coin.give(wallet, wallet2.signingKey.toJSON()).then(()=>{
+          t.equals(coin.givetree[1][0][1].length, 0, "first child children empty")
+          var wallet3 = new dc.Wallet("Ace");
+          wallet3.setupKeys().then(function() {
+            coin.give(wallet2, wallet3.signingKey.toJSON()).then(()=>{
+              t.equals(coin.givetree[1][0][1].length, 1, "first child children one")
+              coin.give(wallet2, wallet.signingKey.toJSON()).then(()=>{
+                t.equals(coin.givetree[1][0][1].length, 2, "first child children after double give")
+                t.equals(coin.givetree[1][0][1][0][1].length, 0, "second child children before give")
+                coin.give(wallet3, wallet.signingKey.toJSON()).then(()=>{
+                  t.equals(coin.givetree[1][0][1][0][1].length, 1, "second child children after give")
+                  // here we will mess with the give tree by putting one of the signatures in an earlier position
+                  var stolenBlock = coin.givetree[1][0][1].pop();
+                  coin.givetree[1].push(stolenBlock);
+
+                  coin.validate().then((valid)=>{
+                    t.equals(false, valid)
+                  })
+
+                })
+              })
+            })
+          })
         })
       })
     })
