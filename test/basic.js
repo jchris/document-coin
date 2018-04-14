@@ -1,4 +1,4 @@
-var test = require('prova')
+var test = require('tape')
 // var jwt = require('webcrypto-jwt');
 var jose = require("node-jose");
 

@@ -1,4 +1,4 @@
-var test = require('prova')
+var test = require('tape')
 const jose = require("node-jose");
 
 require("babel-register");
