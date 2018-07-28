@@ -8,7 +8,7 @@ To run the test suite:
 
 ```
 npm install
-npm start
+npm test
 ```
 
 ### Help wanted.
@@ -17,7 +17,7 @@ If you want to get involved, opening issues is a great way to start. You can als
 
 ### Next steps
 
-* Create a pubic API that works well for all kinds of data.
+* Create a public API that works well for all kinds of data.
 * Connect to PouchDB
 * Make a demo game
 
